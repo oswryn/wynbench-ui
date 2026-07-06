@@ -1,0 +1,251 @@
+:root {
+  font-family:
+    Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #e5eef7;
+  background: #0b1120;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.18), transparent 22rem),
+    #0b1120;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 18rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem 1.5rem;
+  border-right: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.92);
+}
+
+.sidebar-header h1,
+.page-header h2,
+.section-heading h2,
+.subpanel-header h3,
+.result-header h2,
+.empty-state h2 {
+  margin: 0;
+}
+
+.sidebar-header p:last-child,
+.page-header p,
+.section-heading p,
+.subpanel-header p,
+label span,
+dd,
+dt,
+time,
+pre,
+.eyebrow {
+  margin: 0;
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.nav-link {
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.75rem;
+  color: #cbd5e1;
+  background: transparent;
+  transition: background 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(59, 130, 246, 0.18);
+  color: #f8fafc;
+}
+
+.sidebar-meta {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.sidebar-meta div,
+.panel,
+.subpanel {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.72);
+  border-radius: 1rem;
+}
+
+.sidebar-meta div {
+  padding: 0.9rem 1rem;
+}
+
+.page-shell {
+  padding: 2rem;
+}
+
+.page,
+.result-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.page-header,
+.subpanel-header,
+.result-header,
+.row-actions {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.page-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.panel,
+.subpanel {
+  padding: 1.25rem;
+}
+
+.form-grid,
+.step-list,
+.connection-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.section-heading {
+  display: grid;
+  gap: 0.35rem;
+}
+
+label {
+  display: grid;
+  gap: 0.45rem;
+  color: #cbd5e1;
+}
+
+label span,
+.eyebrow,
+dt {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+input,
+select,
+textarea,
+button {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 0.8rem;
+  padding: 0.8rem 0.9rem;
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+textarea {
+  resize: vertical;
+}
+
+button {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: none;
+  font-weight: 600;
+}
+
+.ghost-button {
+  width: auto;
+  padding-inline: 1rem;
+  background: rgba(30, 41, 59, 0.65);
+}
+
+.status-error {
+  color: #fca5a5;
+}
+
+.result-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.result-success {
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+.result-error {
+  border-color: rgba(248, 113, 113, 0.38);
+}
+
+.result-info {
+  border-color: rgba(96, 165, 250, 0.38);
+}
+
+.log-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+pre {
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 0.8rem;
+  background: rgba(2, 6, 23, 0.75);
+}
+
+.empty-state {
+  text-align: center;
+  padding-block: 3rem;
+}
+
+@media (max-width: 960px) {
+  .app-shell,
+  .page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  }
+}
