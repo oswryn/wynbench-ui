@@ -7,7 +7,7 @@ export async function executeAction(request: ActionRequest): Promise<AgentResult
     body: request,
   })
 
-  return normalizeAgentResult(response, 'action', request.action)
+  return normalizeAgentResult(response, 'action', request.plugin)
 }
 
 function normalizeAgentResult(response: unknown, source: AgentResult['source'], label: string): AgentResult {

@@ -12,11 +12,11 @@ export async function runWorkflow(request: WorkflowRequest): Promise<AgentResult
 
 function normalizeWorkflowResult(response: unknown, workflowName: string): AgentResult {
   const root = asRecord(response)
-  const nestedResult = asRecord(root?.result)
-  const status = root?.status === 'error' || nestedResult?.status === 'error' ? 'error' : 'success'
-  const logs = toStringArray(nestedResult?.logs ?? root?.logs)
+  const hasFailure = root?.success === false
+  const status = hasFailure ? 'error' : 'success'
+  const logs = toStringArray(root?.logs)
   const summary =
-    getString(nestedResult?.summary ?? root?.summary) ??
+    getString(root?.summary) ??
     `Workflow ${workflowName} ${status === 'error' ? 'failed' : 'completed'}`
 
   return {
@@ -24,9 +24,9 @@ function normalizeWorkflowResult(response: unknown, workflowName: string): Agent
     source: 'workflow',
     status,
     summary,
-    response: nestedResult?.response ?? root?.response ?? response,
+    response,
     logs,
-    error: getString(nestedResult?.error ?? root?.error) ?? undefined,
+    error: getString(root?.error) ?? undefined,
     timestamp: new Date().toISOString(),
   }
 }

@@ -8,8 +8,8 @@ type ActionBuilderProps = {
 
 function ActionBuilder({ connections, onExecute }: ActionBuilderProps) {
   const [connectionId, setConnectionId] = useState('')
-  const [action, setAction] = useState('')
-  const [payload, setPayload] = useState('{\n  "input": ""\n}')
+  const [plugin, setPlugin] = useState('http')
+  const [payload, setPayload] = useState('{\n  "url": "https://example.com",\n  "method": "GET"\n}')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [parseError, setParseError] = useState<string | null>(null)
 
@@ -32,9 +32,9 @@ function ActionBuilder({ connections, onExecute }: ActionBuilderProps) {
 
     try {
       await onExecute({
-        connectionId,
-        action,
-        payload: parsedPayload,
+        plugin,
+        connection_id: connectionId || undefined,
+        params: typeof parsedPayload === 'object' && parsedPayload !== null ? (parsedPayload as Record<string, unknown>) : {},
       })
     } finally {
       setIsSubmitting(false)
@@ -66,18 +66,20 @@ function ActionBuilder({ connections, onExecute }: ActionBuilderProps) {
       </label>
 
       <label>
-        <span>Action name</span>
-        <input
+        <span>Plugin</span>
+        <select
           required
           disabled={isDisabled}
-          value={action}
-          onChange={(event) => setAction(event.target.value)}
-          placeholder="ping"
-        />
+          value={plugin}
+          onChange={(event) => setPlugin(event.target.value)}
+        >
+          <option value="http">HTTP</option>
+          <option value="sql">SQL</option>
+        </select>
       </label>
 
       <label>
-        <span>Payload</span>
+        <span>Params (JSON)</span>
         <textarea
           rows={10}
           disabled={isDisabled}

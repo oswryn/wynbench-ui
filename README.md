@@ -20,16 +20,14 @@ Browser-based frontend for Wynbench. Built with React + Vite. Provides connectio
 
 ## Connecting to the Wynbench agent
 
-The UI expects the Wynbench agent to expose HTTP endpoints and a WebSocket stream.
+The UI talks to the Wynbench agent over HTTP.
 
-- `VITE_WYNBENCH_AGENT_HTTP_URL` defaults to `http://localhost:8000`
-- `VITE_WYNBENCH_AGENT_WS_URL` defaults to `ws://localhost:8000/ws`
+- `VITE_WYNBENCH_AGENT_HTTP_URL` defaults to `http://localhost:8080`
 
 Create a `.env` file if your agent is hosted elsewhere:
 
 ```bash
-VITE_WYNBENCH_AGENT_HTTP_URL=http://localhost:8000
-VITE_WYNBENCH_AGENT_WS_URL=ws://localhost:8000/ws
+VITE_WYNBENCH_AGENT_HTTP_URL=http://localhost:8080
 ```
 
 ## Available pages
@@ -37,7 +35,7 @@ VITE_WYNBENCH_AGENT_WS_URL=ws://localhost:8000/ws
 - **Connections** — create, inspect, and delete saved connection targets
 - **Actions** — build a protocol action payload and execute it
 - **Workflows** — compose multi-step workflows with editable JSON payloads
-- **Results** — review responses, logs, WebSocket events, and errors
+- **Results** — review responses, logs, and errors
 
 ## Scripts
 

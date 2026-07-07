@@ -9,7 +9,7 @@ function ResultViewer({ results }: ResultViewerProps) {
     return (
       <section className="panel empty-state">
         <h2>No results yet</h2>
-        <p>Executed actions, workflow runs, socket events, and errors will appear here.</p>
+        <p>Executed actions, workflow runs, connection events, and errors will appear here.</p>
       </section>
     )
   }

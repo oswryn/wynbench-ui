@@ -1,9 +1,5 @@
 const DEFAULT_HTTP_URL =
-  import.meta.env.VITE_WYNBENCH_AGENT_HTTP_URL?.replace(/\/$/, '') ?? 'http://localhost:8000'
-
-const DEFAULT_WS_URL =
-  import.meta.env.VITE_WYNBENCH_AGENT_WS_URL?.replace(/\/$/, '') ??
-  DEFAULT_HTTP_URL.replace(/^http/, 'ws').concat('/ws')
+  import.meta.env.VITE_WYNBENCH_AGENT_HTTP_URL?.replace(/\/$/, '') ?? 'http://localhost:8080'
 
 type RequestOptions = Omit<RequestInit, 'body'> & {
   body?: unknown
@@ -28,6 +24,10 @@ export async function requestJson<T>(path: string, options: RequestOptions = {})
   }
 
   return parsedBody as T
+}
+
+export async function checkAgentHealth() {
+  return requestJson<{ status: string; plugins: string[] }>('/health')
 }
 
 function parseBody(body: string) {
@@ -56,22 +56,4 @@ function getErrorMessage(body: unknown, fallback: string) {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null
-}
-
-type SocketHandlers = {
-  onOpen?: () => void
-  onClose?: () => void
-  onError?: (message: string) => void
-  onMessage?: (payload: unknown) => void
-}
-
-export function connectAgentSocket(handlers: SocketHandlers) {
-  const socket = new WebSocket(DEFAULT_WS_URL)
-
-  socket.onopen = () => handlers.onOpen?.()
-  socket.onclose = () => handlers.onClose?.()
-  socket.onerror = () => handlers.onError?.('WebSocket connection failed')
-  socket.onmessage = (event) => handlers.onMessage?.(parseBody(event.data))
-
-  return socket
 }

@@ -6,9 +6,12 @@ type ConnectionFormProps = {
 }
 
 const defaultState: ConnectionInput = {
+  id: '',
   name: '',
-  endpoint: '',
   protocol: 'http',
+  config: {
+    url: '',
+  },
 }
 
 function ConnectionForm({ onSubmit }: ConnectionFormProps) {
@@ -35,6 +38,16 @@ function ConnectionForm({ onSubmit }: ConnectionFormProps) {
       </div>
 
       <label>
+        <span>ID</span>
+        <input
+          required
+          value={formState.id}
+          onChange={(event) => setFormState((current) => ({ ...current, id: event.target.value }))}
+          placeholder="local-http"
+        />
+      </label>
+
+      <label>
         <span>Name</span>
         <input
           required
@@ -45,12 +58,20 @@ function ConnectionForm({ onSubmit }: ConnectionFormProps) {
       </label>
 
       <label>
-        <span>Endpoint</span>
+        <span>Config URL</span>
         <input
           required
-          value={formState.endpoint}
-          onChange={(event) => setFormState((current) => ({ ...current, endpoint: event.target.value }))}
-          placeholder="http://localhost:8000"
+          value={typeof formState.config.url === 'string' ? formState.config.url : ''}
+          onChange={(event) =>
+            setFormState((current) => ({
+              ...current,
+              config: {
+                ...current.config,
+                url: event.target.value,
+              },
+            }))
+          }
+          placeholder="https://example.com"
         />
       </label>
 
@@ -61,8 +82,7 @@ function ConnectionForm({ onSubmit }: ConnectionFormProps) {
           onChange={(event) => setFormState((current) => ({ ...current, protocol: event.target.value }))}
         >
           <option value="http">HTTP</option>
-          <option value="ws">WebSocket</option>
-          <option value="grpc">gRPC</option>
+          <option value="sql">SQL</option>
         </select>
       </label>
 

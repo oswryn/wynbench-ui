@@ -1,10 +1,30 @@
+import { useEffect } from 'react'
 import ConnectionForm from '../components/ConnectionForm'
-import { createConnection, deleteConnection } from '../api/connections'
+import { createConnection, deleteConnection, listConnections } from '../api/connections'
 import { useStore } from '../state/store'
 import type { ConnectionInput } from '../types'
 
 function ConnectionsPage() {
-  const { connections, addConnection, removeConnection, appendResult } = useStore()
+  const { connections, addConnection, setConnections, removeConnection, appendResult } = useStore()
+
+  useEffect(() => {
+    void listConnections()
+      .then((items) => {
+        setConnections(items)
+      })
+      .catch((error) => {
+        appendResult({
+          id: crypto.randomUUID(),
+          source: 'connection',
+          status: 'error',
+          summary: 'Failed to load connections',
+          response: null,
+          logs: [],
+          error: error instanceof Error ? error.message : 'Unknown error',
+          timestamp: new Date().toISOString(),
+        })
+      })
+  }, [appendResult, setConnections])
 
   async function handleCreate(input: ConnectionInput) {
     try {
@@ -16,7 +36,9 @@ function ConnectionsPage() {
         status: 'success',
         summary: `Created connection ${connection.name}`,
         response: connection,
-        logs: [`${connection.protocol.toUpperCase()} -> ${connection.endpoint}`],
+        logs: [
+          `${connection.protocol.toUpperCase()} -> ${typeof connection.config.url === 'string' ? connection.config.url : 'configured'}`,
+        ],
         timestamp: new Date().toISOString(),
       })
     } catch (error) {
@@ -86,7 +108,8 @@ function ConnectionsPage() {
                   <div>
                     <h3>{connection.name}</h3>
                     <p>
-                      {connection.protocol.toUpperCase()} · {connection.endpoint}
+                      {connection.protocol.toUpperCase()} ·{' '}
+                      {typeof connection.config.url === 'string' ? connection.config.url : 'custom config'}
                     </p>
                   </div>
                   <button type="button" className="ghost-button" onClick={() => handleDelete(connection.id, connection.name)}>

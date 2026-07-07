@@ -15,7 +15,7 @@ function ActionsPage() {
         id: crypto.randomUUID(),
         source: 'action',
         status: 'error',
-        summary: `Failed to execute action ${request.action}`,
+        summary: `Failed to execute ${request.plugin} action`,
         response: request,
         logs: [],
         error: error instanceof Error ? error.message : 'Unknown error',

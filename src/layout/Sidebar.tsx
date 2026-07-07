@@ -9,7 +9,7 @@ const navItems = [
 ]
 
 function Sidebar() {
-  const { connections, socketStatus } = useStore()
+  const { connections, agentStatus } = useStore()
 
   return (
     <aside className="sidebar">
@@ -33,8 +33,8 @@ function Sidebar() {
           <dd>{connections.length}</dd>
         </div>
         <div>
-          <dt>Socket</dt>
-          <dd>{socketStatus}</dd>
+          <dt>Agent</dt>
+          <dd>{agentStatus}</dd>
         </div>
       </dl>
     </aside>

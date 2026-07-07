@@ -12,14 +12,15 @@ function WorkflowEditor({ connections, onRun }: WorkflowEditorProps) {
   const [steps, setSteps] = useState([
     {
       id: crypto.randomUUID(),
-      action: 'ping',
-      payload: '{\n  "input": ""\n}',
+      name: 'step-1',
+      plugin: 'http',
+      payload: '{\n  "url": "https://example.com",\n  "method": "GET"\n}',
     },
   ])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [parseError, setParseError] = useState<string | null>(null)
 
-  function updateStep(stepId: string, field: 'action' | 'payload', value: string) {
+  function updateStep(stepId: string, field: 'name' | 'plugin' | 'payload', value: string) {
     setSteps((current) => current.map((step) => (step.id === stepId ? { ...step, [field]: value } : step)))
   }
 
@@ -28,8 +29,9 @@ function WorkflowEditor({ connections, onRun }: WorkflowEditorProps) {
       ...current,
       {
         id: crypto.randomUUID(),
-        action: '',
-        payload: '{\n  "input": ""\n}',
+        name: '',
+        plugin: 'http',
+        payload: '{\n  "url": "https://example.com",\n  "method": "GET"\n}',
       },
     ])
   }
@@ -46,8 +48,12 @@ function WorkflowEditor({ connections, onRun }: WorkflowEditorProps) {
 
     try {
       parsedSteps = steps.map((step) => ({
-        action: step.action,
-        payload: JSON.parse(step.payload),
+        name: step.name,
+        action: {
+          plugin: step.plugin,
+          connection_id: connectionId || undefined,
+          params: JSON.parse(step.payload),
+        },
       }))
     } catch {
       setParseError('Each workflow step payload must be valid JSON.')
@@ -59,7 +65,6 @@ function WorkflowEditor({ connections, onRun }: WorkflowEditorProps) {
     try {
       await onRun({
         name,
-        connectionId,
         steps: parsedSteps,
       })
     } finally {
@@ -102,17 +107,25 @@ function WorkflowEditor({ connections, onRun }: WorkflowEditorProps) {
             </div>
 
             <label>
-              <span>Action</span>
+              <span>Step name</span>
               <input
                 required
-                value={step.action}
-                onChange={(event) => updateStep(step.id, 'action', event.target.value)}
+                value={step.name}
+                onChange={(event) => updateStep(step.id, 'name', event.target.value)}
                 placeholder="fetch-status"
               />
             </label>
 
             <label>
-              <span>Payload</span>
+              <span>Plugin</span>
+              <select value={step.plugin} onChange={(event) => updateStep(step.id, 'plugin', event.target.value)}>
+                <option value="http">HTTP</option>
+                <option value="sql">SQL</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Params (JSON)</span>
               <textarea
                 rows={8}
                 value={step.payload}

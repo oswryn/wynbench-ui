@@ -1,30 +1,29 @@
 export type ResultStatus = 'success' | 'error' | 'info'
 
 export type ConnectionInput = {
+  id: string
   name: string
-  endpoint: string
   protocol: string
+  config: Record<string, unknown>
 }
 
 export type ConnectionRecord = ConnectionInput & {
-  id: string
-  createdAt: string
+  createdAt?: string
 }
 
 export type ActionRequest = {
-  connectionId: string
-  action: string
-  payload: unknown
+  plugin: string
+  connection_id?: string
+  params: Record<string, unknown>
 }
 
 export type WorkflowStep = {
-  action: string
-  payload: unknown
+  name: string
+  action: ActionRequest
 }
 
 export type WorkflowRequest = {
   name: string
-  connectionId: string
   steps: WorkflowStep[]
 }
 
@@ -42,8 +41,9 @@ export type AgentResult = {
 export type StoreContextValue = {
   connections: ConnectionRecord[]
   results: AgentResult[]
-  socketStatus: 'connecting' | 'connected' | 'disconnected'
+  agentStatus: 'checking' | 'online' | 'offline'
   addConnection: (connection: ConnectionRecord) => void
+  setConnections: (connections: ConnectionRecord[]) => void
   removeConnection: (connectionId: string) => void
   appendResult: (result: AgentResult) => void
 }
