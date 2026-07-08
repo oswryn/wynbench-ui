@@ -134,7 +134,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const clearResults = useCallback(() => dispatch({ type: 'clearResults' }), [dispatch])
   const setAgentStatus = useCallback((status: StoreState['agentStatus']) => dispatch({ type: 'setAgentStatus', payload: status }), [dispatch])
   const setColorMode = useCallback((mode: ColorMode) => {
-    globalThis.localStorage.setItem(COLOR_MODE_KEY, mode)
+    try {
+      globalThis.localStorage?.setItem(COLOR_MODE_KEY, mode)
+    } catch {
+      // Ignore storage errors (e.g. blocked/disabled storage).
+    }
     dispatch({ type: 'setColorMode', payload: mode })
   }, [dispatch])
 
