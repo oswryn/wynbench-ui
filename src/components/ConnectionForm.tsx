@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { Button, Card, Classes, FormGroup, H4, HTMLSelect, InputGroup, TextArea } from '@blueprintjs/core'
+import { getProtocol, protocolOptions } from '../protocols'
 import type { ConnectionInput } from '../types'
 
 type ConnectionFormProps = {
@@ -9,9 +11,7 @@ const defaultState: ConnectionInput = {
   id: '',
   name: '',
   protocol: 'http',
-  config: {
-    url: '',
-  },
+  config: {},
 }
 
 function ConnectionForm({ onSubmit }: ConnectionFormProps) {
@@ -30,66 +30,94 @@ function ConnectionForm({ onSubmit }: ConnectionFormProps) {
     }
   }
 
+  function handleProtocolChange(nextProtocol: string) {
+    // Swap the config fields over to the ones relevant for the new protocol,
+    // dropping values tied to the previous protocol's fields.
+    const nextFields = getProtocol(nextProtocol).fields
+    const nextConfig: Record<string, unknown> = {}
+    for (const field of nextFields) {
+      nextConfig[field.key] = formState.config[field.key] ?? ''
+    }
+    setFormState((current) => ({ ...current, protocol: nextProtocol, config: nextConfig }))
+  }
+
+  const activeProtocol = getProtocol(formState.protocol)
+
   return (
-    <form className="panel form-grid" onSubmit={handleSubmit}>
-      <div className="section-heading">
-        <h2>Create connection</h2>
-        <p>Register an agent target with a protocol and endpoint.</p>
-      </div>
+    <Card>
+      <form className="form-grid" onSubmit={handleSubmit}>
+        <div>
+          <H4>Create connection</H4>
+          <p className={Classes.TEXT_MUTED}>Store a reusable backend connection profile.</p>
+        </div>
 
-      <label>
-        <span>ID</span>
-        <input
-          required
-          value={formState.id}
-          onChange={(event) => setFormState((current) => ({ ...current, id: event.target.value }))}
-          placeholder="local-http"
-        />
-      </label>
+        <FormGroup label="ID" labelFor="connection-id">
+          <InputGroup
+            id="connection-id"
+            required
+            value={formState.id}
+            onChange={(event) => setFormState((current) => ({ ...current, id: event.target.value }))}
+            placeholder="local-http"
+          />
+        </FormGroup>
 
-      <label>
-        <span>Name</span>
-        <input
-          required
-          value={formState.name}
-          onChange={(event) => setFormState((current) => ({ ...current, name: event.target.value }))}
-          placeholder="Local Wynbench agent"
-        />
-      </label>
+        <FormGroup label="Name" labelFor="connection-name">
+          <InputGroup
+            id="connection-name"
+            required
+            value={formState.name}
+            onChange={(event) => setFormState((current) => ({ ...current, name: event.target.value }))}
+            placeholder="Local API"
+          />
+        </FormGroup>
 
-      <label>
-        <span>Config URL</span>
-        <input
-          required
-          value={typeof formState.config.url === 'string' ? formState.config.url : ''}
-          onChange={(event) =>
-            setFormState((current) => ({
-              ...current,
-              config: {
-                ...current.config,
-                url: event.target.value,
-              },
-            }))
-          }
-          placeholder="https://example.com"
-        />
-      </label>
+        <FormGroup label="Protocol" labelFor="connection-protocol">
+          <HTMLSelect
+            id="connection-protocol"
+            fill
+            value={formState.protocol}
+            onChange={(event) => handleProtocolChange(event.target.value)}
+            options={protocolOptions}
+          />
+        </FormGroup>
 
-      <label>
-        <span>Protocol</span>
-        <select
-          value={formState.protocol}
-          onChange={(event) => setFormState((current) => ({ ...current, protocol: event.target.value }))}
-        >
-          <option value="http">HTTP</option>
-          <option value="sql">SQL</option>
-        </select>
-      </label>
+        {activeProtocol.fields.map((field) => (
+          <FormGroup key={field.key} label={field.label} labelFor={`connection-${field.key}`}>
+            {field.multiline ? (
+              <TextArea
+                id={`connection-${field.key}`}
+                fill
+                autoResize
+                required
+                value={typeof formState.config[field.key] === 'string' ? (formState.config[field.key] as string) : ''}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    config: { ...current.config, [field.key]: event.target.value },
+                  }))
+                }
+                placeholder={field.placeholder}
+              />
+            ) : (
+              <InputGroup
+                id={`connection-${field.key}`}
+                required
+                value={typeof formState.config[field.key] === 'string' ? (formState.config[field.key] as string) : ''}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    config: { ...current.config, [field.key]: event.target.value },
+                  }))
+                }
+                placeholder={field.placeholder}
+              />
+            )}
+          </FormGroup>
+        ))}
 
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Saving…' : 'Create connection'}
-      </button>
-    </form>
+        <Button type="submit" intent="primary" loading={isSubmitting} text="Create connection" />
+      </form>
+    </Card>
   )
 }
 

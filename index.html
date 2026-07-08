@@ -5,6 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wynbench UI</title>
+    <script>
+      (function () {
+        var saved = window.localStorage.getItem('wynbench.colorMode');
+        var isLight = saved === 'light' || (!saved && window.matchMedia('(prefers-color-scheme: light)').matches);
+        document.documentElement.classList.toggle('bp6-dark', !isLight);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

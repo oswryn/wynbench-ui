@@ -1,9 +1,11 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import Sidebar from './layout/Sidebar'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import TopNav from './layout/TopNav'
+import HomePage from './pages/Home'
 import ConnectionsPage from './pages/Connections'
 import ActionsPage from './pages/Actions'
 import WorkflowsPage from './pages/Workflows'
 import ResultsPage from './pages/Results'
+import SettingsPage from './pages/Settings'
 import { StoreProvider } from './state/store'
 
 function App() {
@@ -11,14 +13,15 @@ function App() {
     <BrowserRouter>
       <StoreProvider>
         <div className="app-shell">
-          <Sidebar />
+          <TopNav />
           <main className="page-shell">
             <Routes>
-              <Route path="/" element={<Navigate to="/connections" replace />} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/connections" element={<ConnectionsPage />} />
               <Route path="/actions" element={<ActionsPage />} />
               <Route path="/workflows" element={<WorkflowsPage />} />
               <Route path="/results" element={<ResultsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </main>
         </div>

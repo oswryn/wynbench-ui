@@ -1,19 +1,39 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Button, Callout, Card, Classes, FormGroup, HTMLSelect, H4, TextArea } from '@blueprintjs/core'
+import { getProtocol, protocolOptions } from '../protocols'
 import type { ActionRequest, ConnectionRecord } from '../types'
 
 type ActionBuilderProps = {
   connections: ConnectionRecord[]
+  selectedPlugin?: string
   onExecute: (request: ActionRequest) => Promise<void>
 }
 
-function ActionBuilder({ connections, onExecute }: ActionBuilderProps) {
+function ActionBuilder({ connections, selectedPlugin, onExecute }: ActionBuilderProps) {
   const [connectionId, setConnectionId] = useState('')
-  const [plugin, setPlugin] = useState('http')
-  const [payload, setPayload] = useState('{\n  "url": "https://example.com",\n  "method": "GET"\n}')
+  const [plugin, setPlugin] = useState(selectedPlugin ?? 'http')
+  const [payload, setPayload] = useState(getProtocol(selectedPlugin ?? 'http').defaultActionPayload)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [parseError, setParseError] = useState<string | null>(null)
+  const navigate = useNavigate()
+  const hasConnections = connections.length > 0
+
+  useEffect(() => {
+    if (selectedPlugin) {
+      setPlugin(selectedPlugin)
+      setPayload(getProtocol(selectedPlugin).defaultActionPayload)
+    }
+  }, [selectedPlugin])
 
   const isDisabled = useMemo(() => connections.length === 0 || isSubmitting, [connections.length, isSubmitting])
+
+  function handlePluginChange(nextPlugin: string) {
+    setPayload((current) =>
+      current === getProtocol(plugin).defaultActionPayload ? getProtocol(nextPlugin).defaultActionPayload : current,
+    )
+    setPlugin(nextPlugin)
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -42,58 +62,79 @@ function ActionBuilder({ connections, onExecute }: ActionBuilderProps) {
   }
 
   return (
-    <form className="panel form-grid" onSubmit={handleSubmit}>
-      <div className="section-heading">
-        <h2>Build an action</h2>
-        <p>Compose a single protocol action and execute it against the selected connection.</p>
-      </div>
+    <Card className="glass-panel action-builder-card">
+      <form className="form-grid" onSubmit={handleSubmit}>
+        <div>
+          <H4>Create a protocol action</H4>
+          <p className={Classes.TEXT_MUTED}>
+            Compose a request payload, choose a connection, and execute the action with the selected plugin.
+          </p>
+        </div>
 
-      <label>
-        <span>Connection</span>
-        <select
-          required
-          disabled={isDisabled}
-          value={connectionId}
-          onChange={(event) => setConnectionId(event.target.value)}
-        >
-          <option value="">{connections.length === 0 ? 'Create a connection first' : 'Select a connection'}</option>
-          {connections.map((connection) => (
-            <option key={connection.id} value={connection.id}>
-              {connection.name}
-            </option>
-          ))}
-        </select>
-      </label>
+        <FormGroup label="Connection" labelFor="action-connection">
+          {hasConnections ? (
+            <HTMLSelect
+              id="action-connection"
+              fill
+              required
+              disabled={isSubmitting}
+              value={connectionId}
+              onChange={(event) => setConnectionId(event.target.value)}
+              options={[
+                { value: '', label: 'Select a connection' },
+                ...connections.map((connection) => ({ value: connection.id, label: connection.name })),
+              ]}
+            />
+          ) : (
+            <Button
+              id="action-connection"
+              fill
+              minimal
+              outlined
+              intent="primary"
+              icon="link"
+              text="Create a connection first"
+              onClick={() => navigate('/connections')}
+            />
+          )}
+          {!hasConnections ? (
+            <div className={Classes.TEXT_MUTED} style={{ marginTop: '0.5rem' }}>
+              No saved connections exist yet. Create one to execute actions against a backend.
+            </div>
+          ) : null}
+        </FormGroup>
 
-      <label>
-        <span>Plugin</span>
-        <select
-          required
-          disabled={isDisabled}
-          value={plugin}
-          onChange={(event) => setPlugin(event.target.value)}
-        >
-          <option value="http">HTTP</option>
-          <option value="sql">SQL</option>
-        </select>
-      </label>
+        {!selectedPlugin ? (
+          <FormGroup label="Plugin" labelFor="action-plugin">
+            <HTMLSelect
+              id="action-plugin"
+              fill
+              required
+              disabled={isDisabled}
+              value={plugin}
+              onChange={(event) => handlePluginChange(event.target.value)}
+              options={protocolOptions}
+            />
+          </FormGroup>
+        ) : null}
 
-      <label>
-        <span>Params (JSON)</span>
-        <textarea
-          rows={10}
-          disabled={isDisabled}
-          value={payload}
-          onChange={(event) => setPayload(event.target.value)}
-        />
-      </label>
+        <FormGroup label="Action payload (JSON)" labelFor="action-payload">
+          <TextArea
+            id="action-payload"
+            fill
+            autoResize
+            rows={12}
+            disabled={isDisabled}
+            value={payload}
+            onChange={(event) => setPayload(event.target.value)}
+          />
+        </FormGroup>
 
-      {parseError ? <p className="status-error">{parseError}</p> : null}
+        {parseError ? <Callout intent="danger">{parseError}</Callout> : null}
 
-      <button type="submit" disabled={isDisabled}>
-        {isSubmitting ? 'Executing…' : 'Execute action'}
-      </button>
-    </form>
+        <Button type="submit" intent="primary" loading={isSubmitting} disabled={!hasConnections || isSubmitting} text="Execute request" />
+      </form>
+    </Card>
   )
 }
 

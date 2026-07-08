@@ -1,36 +1,50 @@
-import type { AgentResult } from '../types'
+import { Callout, Card, Classes, H4, NonIdealState, Pre, Tag, type IntentProps } from '@blueprintjs/core'
+import type { AgentResult, ResultStatus } from '../types'
 
 type ResultViewerProps = {
   results: AgentResult[]
 }
 
+const intentByStatus: Record<ResultStatus, IntentProps['intent']> = {
+  success: 'success',
+  error: 'danger',
+  info: 'primary',
+}
+
 function ResultViewer({ results }: ResultViewerProps) {
   if (results.length === 0) {
     return (
-      <section className="panel empty-state">
-        <h2>No results yet</h2>
-        <p>Executed actions, workflow runs, connection events, and errors will appear here.</p>
-      </section>
+      <NonIdealState
+        icon="th-list"
+        title="No results yet"
+        description="Executed actions, workflow runs, connection events, and errors will appear here."
+      />
     )
   }
 
   return (
     <div className="result-list">
       {results.map((result) => (
-        <article key={result.id} className={`panel result-card result-${result.status}`}>
-          <div className="result-header">
+        <Card key={result.id}>
+          <div className="page-header">
             <div>
-              <p className="eyebrow">{result.source}</p>
-              <h2>{result.summary}</h2>
+              <div className="error-tag">
+                <Tag minimal intent={intentByStatus[result.status]}>
+                  {result.source}
+                </Tag>
+              </div>
+              <H4>{result.summary}</H4>
             </div>
-            <time dateTime={result.timestamp}>{new Date(result.timestamp).toLocaleString()}</time>
+            <time className={Classes.TEXT_MUTED} dateTime={result.timestamp}>
+              {new Date(result.timestamp).toLocaleString()}
+            </time>
           </div>
 
-          {result.error ? <p className="status-error">{result.error}</p> : null}
+          {result.error ? <Callout intent="danger">{result.error}</Callout> : null}
 
           {result.logs.length > 0 ? (
             <section>
-              <h3>Logs</h3>
+              <H4>Logs</H4>
               <ul className="log-list">
                 {result.logs.map((entry, index) => (
                   <li key={`${result.id}-log-${index}`}>{entry}</li>
@@ -40,10 +54,10 @@ function ResultViewer({ results }: ResultViewerProps) {
           ) : null}
 
           <section>
-            <h3>Response</h3>
-            <pre>{JSON.stringify(result.response ?? null, null, 2)}</pre>
+            <H4>Response</H4>
+            <Pre>{JSON.stringify(result.response ?? null, null, 2)}</Pre>
           </section>
-        </article>
+        </Card>
       ))}
     </div>
   )
