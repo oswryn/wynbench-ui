@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Card,
+  Checkbox,
   Classes,
   FormGroup,
   H4,
@@ -9,9 +10,9 @@ import {
   HTMLSelect,
   InputGroup,
   HTMLTable,
-  Spinner,
 } from '@blueprintjs/core'
 import {
+  createKafkaTopic,
   listKafkaTopics,
   readKafkaTopicMessages,
   type KafkaTopicMessage,
@@ -41,6 +42,12 @@ function KafkaTopicExplorer({ connections }: { connections: ConnectionRecord[] }
   const [error, setError] = useState<string | null>(null)
   const [partition, setPartition] = useState('0')
   const [count, setCount] = useState('20')
+  const [hideInternalTopics, setHideInternalTopics] = useState(true)
+  const [createTopicName, setCreateTopicName] = useState('')
+  const [createPartitions, setCreatePartitions] = useState('1')
+  const [createReplicationFactor, setCreateReplicationFactor] = useState('1')
+  const [creatingTopic, setCreatingTopic] = useState(false)
+  const [createTopicError, setCreateTopicError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!selectedConnectionId && kafkaConnections.length > 0) {
@@ -82,6 +89,9 @@ function KafkaTopicExplorer({ connections }: { connections: ConnectionRecord[] }
 
   async function loadMessages(topic: string) {
     setError(null)
+    setCreateTopicError(null)
+    setCreateTopicError(null)
+    setCreateTopicError(null)
     setSelectedTopic(topic)
     setMessages([])
 
@@ -121,6 +131,53 @@ function KafkaTopicExplorer({ connections }: { connections: ConnectionRecord[] }
       setLoadingMessages(false)
     }
   }
+
+  async function handleCreateTopic() {
+    setCreateTopicError(null)
+    setError(null)
+
+    const normalizedBrokers = brokers.trim()
+    if (!normalizedBrokers) {
+      setCreateTopicError('Broker list is required to create a topic.')
+      return
+    }
+    const topic = createTopicName.trim()
+    if (!topic) {
+      setCreateTopicError('Topic name is required.')
+      return
+    }
+
+    const partitions = Number(createPartitions)
+    const replicationFactor = Number(createReplicationFactor)
+    if (Number.isNaN(partitions) || partitions <= 0) {
+      setCreateTopicError('Partitions must be a valid positive integer.')
+      return
+    }
+    if (Number.isNaN(replicationFactor) || replicationFactor <= 0) {
+      setCreateTopicError('Replication factor must be a valid positive integer.')
+      return
+    }
+
+    setCreatingTopic(true)
+    try {
+      await createKafkaTopic(selectedConnectionId, topic, normalizedBrokers, partitions, replicationFactor)
+      setCreateTopicName('')
+      await loadTopics()
+    } catch (err) {
+      setCreateTopicError(err instanceof Error ? err.message : 'Failed to create Kafka topic')
+    } finally {
+      setCreatingTopic(false)
+    }
+  }
+
+  const filteredTopics = useMemo(() => {
+    return hideInternalTopics
+      ? topics.filter((topic) => {
+          const trimmed = topic.trim()
+          return !(trimmed.startsWith('_') || trimmed.startsWith('.') || trimmed.startsWith('default') || trimmed.startsWith('connect-'))
+        })
+      : topics
+  }, [hideInternalTopics, topics])
 
   const connectionOptions = kafkaConnections.map((connection) => (
     <option key={connection.id} value={connection.id}>
@@ -167,6 +224,52 @@ function KafkaTopicExplorer({ connections }: { connections: ConnectionRecord[] }
         />
       </FormGroup>
 
+      <Card className="glass-panel kafka-topic-create-card">
+        <H5>Create Kafka topic</H5>
+        <p className={Classes.TEXT_MUTED}>Create a new topic directly on the selected Kafka cluster.</p>
+        <div className="kafka-topic-row">
+          <FormGroup label="Topic" labelFor="kafka-create-topic">
+            <InputGroup
+              id="kafka-create-topic"
+              fill
+              value={createTopicName}
+              onChange={(event) => setCreateTopicName(event.target.value)}
+              placeholder="my-topic"
+            />
+          </FormGroup>
+          <FormGroup label="Partitions" labelFor="kafka-create-partitions">
+            <InputGroup
+              id="kafka-create-partitions"
+              value={createPartitions}
+              onChange={(event) => setCreatePartitions(event.target.value)}
+              placeholder="1"
+            />
+          </FormGroup>
+          <FormGroup label="Replication factor" labelFor="kafka-create-replication">
+            <InputGroup
+              id="kafka-create-replication"
+              value={createReplicationFactor}
+              onChange={(event) => setCreateReplicationFactor(event.target.value)}
+              placeholder="1"
+            />
+          </FormGroup>
+          <Button
+            icon="add"
+            intent="primary"
+            text="Create topic"
+            onClick={handleCreateTopic}
+            loading={creatingTopic}
+          />
+        </div>
+        {createTopicError ? <div className="error-text">{createTopicError}</div> : null}
+      </Card>
+
+      <Checkbox
+        checked={hideInternalTopics}
+        label="Hide internal Kafka topics"
+        onChange={(event) => setHideInternalTopics(event.currentTarget.checked)}
+      />
+
       <div className="kafka-topic-row">
         <FormGroup label="Partition" labelFor="kafka-partition">
           <InputGroup
@@ -196,9 +299,9 @@ function KafkaTopicExplorer({ connections }: { connections: ConnectionRecord[] }
 
       {error ? <div className="error-text">{error}</div> : null}
 
-      {topics.length > 0 ? (
+      {filteredTopics.length > 0 ? (
         <div className="topic-list">
-          {topics.map((topic) => (
+          {filteredTopics.map((topic) => (
             <Button
               key={topic}
               minimal
@@ -212,7 +315,9 @@ function KafkaTopicExplorer({ connections }: { connections: ConnectionRecord[] }
           ))}
         </div>
       ) : (
-        <div className={Classes.TEXT_MUTED}>No topics loaded yet. Click reload to discover topics.</div>
+        <div className={Classes.TEXT_MUTED}>
+          No topics loaded yet. Click reload to discover topics.
+        </div>
       )}
 
       {selectedTopic ? (
@@ -224,7 +329,6 @@ function KafkaTopicExplorer({ connections }: { connections: ConnectionRecord[] }
                 Showing up to {count} message(s) from partition {partition}.
               </p>
             </div>
-            {loadingMessages ? <Spinner size={20} /> : null}
           </div>
 
           {messages.length === 0 ? (

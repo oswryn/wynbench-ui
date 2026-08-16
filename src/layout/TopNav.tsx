@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   Alignment,
   Button,
   Classes,
   Icon,
+  Menu,
+  MenuItem,
   Navbar,
   NavbarDivider,
   NavbarGroup,
   NavbarHeading,
+  PopoverNext,
+  PopoverInteractionKind,
   Tag,
   type IntentProps,
 } from '@blueprintjs/core'
@@ -18,16 +22,33 @@ import { useStore } from '../state/store'
 
 const navItems: { to: string; label: string; icon: IconName }[] = [
   { to: '/connections', label: 'Connections', icon: 'link' },
-  { to: '/actions', label: 'Actions', icon: 'build' },
   { to: '/workflows', label: 'Workflows', icon: 'exchange' },
   { to: '/results', label: 'Results', icon: 'history' },
   { to: '/settings', label: 'Settings', icon: 'cog' },
+]
+
+type ActionMenuItem =
+  | { to: string; label: string }
+  | { label: string; children: Array<{ to: string; label: string }> }
+
+const actionsMenu: ActionMenuItem[] = [
+  { to: '/actions?mode=http', label: 'HTTP' },
+  { to: '/actions?mode=kafka', label: 'Kafka' },
+  {
+    label: 'SQL',
+    children: [
+      { to: '/actions?mode=sql-postgres', label: 'PostgreSQL' },
+      { to: '/actions?mode=sql-mssql', label: 'MSSQL' },
+    ],
+  },
 ]
 
 function TopNav() {
   const { connections, agentStatus, setAgentStatus, colorMode, setColorMode } = useStore()
   const [isTesting, setIsTesting] = useState(false)
   const [backendStatusText, setBackendStatusText] = useState('status unknown')
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (agentStatus === 'online') {
@@ -62,6 +83,37 @@ function TopNav() {
           </NavbarHeading>
         </Link>
         <NavbarDivider />
+        <PopoverNext
+          interactionKind={PopoverInteractionKind.HOVER}
+          hoverOpenDelay={100}
+          hoverCloseDelay={200}
+          placement="bottom-start"
+          positioningStrategy="fixed"
+          rootBoundary="document"
+          popoverClassName="navbar-popover"
+          content={
+            <Menu>
+              {actionsMenu.map((item) =>
+                'children' in item ? (
+                  <MenuItem key={item.label} text={item.label}>
+                    {item.children.map((child) => (
+                      <MenuItem key={child.to} text={child.label} onClick={() => navigate(child.to)} />
+                    ))}
+                  </MenuItem>
+                ) : (
+                  <MenuItem key={item.to} text={item.label} onClick={() => navigate(item.to)} />
+                ),
+              )}
+            </Menu>
+          }
+        >
+          <Button
+            minimal
+            className={`${Classes.BUTTON} ${Classes.MINIMAL} nav-link${location.pathname === '/actions' ? ` ${Classes.ACTIVE}` : ''}`}
+            icon="build"
+            text="Actions"
+          />
+        </PopoverNext>
         {navItems.map((item) => (
           <NavLink
             key={item.to}

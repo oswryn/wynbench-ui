@@ -13,7 +13,10 @@ export async function executeAction(request: ActionRequest): Promise<AgentResult
 function normalizeAgentResult(response: unknown, source: AgentResult['source'], label: string): AgentResult {
   const root = asRecord(response)
   const nestedResult = asRecord(root?.result)
-  const status = resolveStatus(nestedResult?.status ?? root?.status)
+  const status = resolveStatus(
+    nestedResult?.status ?? root?.status,
+    nestedResult?.success ?? root?.success,
+  )
   const logs = toStringArray(nestedResult?.logs ?? root?.logs)
   const error = getString(nestedResult?.error ?? root?.error)
   const summary =
@@ -36,8 +39,17 @@ function asRecord(value: unknown) {
   return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : null
 }
 
-function resolveStatus(value: unknown): ResultStatus {
-  return value === 'error' ? 'error' : value === 'info' ? 'info' : 'success'
+function resolveStatus(value: unknown, success?: unknown): ResultStatus {
+  if (value === 'error') {
+    return 'error'
+  }
+  if (value === 'info') {
+    return 'info'
+  }
+  if (success === false) {
+    return 'error'
+  }
+  return 'success'
 }
 
 function toStringArray(value: unknown) {

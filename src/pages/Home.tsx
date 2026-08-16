@@ -6,9 +6,8 @@ import { useStore } from '../state/store'
 const quickLinks: { to: string; label: string; icon: IconName; description: string }[] = [
   { to: '/connections', label: 'Connections', icon: 'link', description: 'Manage reusable backend connection profiles.' },
   { to: '/actions', label: 'Actions', icon: 'build', description: 'Build and execute a single protocol action.' },
+  { to: '/kafka-admin', label: 'Kafka admin', icon: 'database', description: 'Manage topics, inspect partitions, and delete Kafka topics.' },
   { to: '/workflows', label: 'Workflows', icon: 'exchange', description: 'Compose ordered steps into a single run.' },
-  { to: '/results', label: 'Results', icon: 'history', description: 'Inspect responses, logs, and errors.' },
-  { to: '/settings', label: 'Settings', icon: 'cog', description: 'Configure the backend URL and appearance.' },
 ]
 
 function HomePage() {
@@ -42,7 +41,7 @@ function HomePage() {
           <H5>Quick actions</H5>
           <p className={Classes.TEXT_MUTED}>Jump straight to the workspaces you use most.</p>
           <div className="dashboard-actions">
-            {quickLinks.slice(0, 4).map((item) => (
+            {quickLinks.map((item) => (
               <Link key={item.to} to={item.to} className="dashboard-action-link">
                 <Button outlined fill minimal icon={item.icon} text={item.label} />
               </Link>
@@ -69,7 +68,7 @@ function HomePage() {
           )}
           <div className="dashboard-footer">
             <Link to="/actions" className="dashboard-action-link">
-              <Button intent="primary" text="Explore Kafka topics" />
+              <Button intent="primary" text="Build Kafka action" />
             </Link>
           </div>
         </Card>

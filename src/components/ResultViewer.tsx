@@ -47,7 +47,9 @@ function ResultViewer({ results }: ResultViewerProps) {
               <H4>Logs</H4>
               <ul className="log-list">
                 {result.logs.map((entry, index) => (
-                  <li key={`${result.id}-log-${index}`}>{entry}</li>
+                  <li key={`${result.id}-log-${index}`}>
+                    {entry.includes('\n') ? <pre>{entry}</pre> : entry}
+                  </li>
                 ))}
               </ul>
             </section>

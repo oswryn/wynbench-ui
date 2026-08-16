@@ -1,6 +1,7 @@
 import { Card, Classes, H4 } from '@blueprintjs/core'
 import ActionBuilder from './ActionBuilder'
-import KafkaTopicExplorer from './KafkaTopicExplorer'
+import KafkaAdminPanel from './KafkaAdminPanel'
+import KafkaDataGenerator from './KafkaDataGenerator'
 import type { ActionRequest, ConnectionRecord } from '../types'
 
 type KafkaActionPaneProps = {
@@ -13,25 +14,28 @@ function KafkaActionPane({ connections, onExecute }: KafkaActionPaneProps) {
 
   return (
     <div className="page-grid">
-      <div className="grid-column">
-        <ActionBuilder selectedPlugin="kafka" connections={connections} onExecute={onExecute} />
-      </div>
-      <div className="grid-column">
-        <Card className="glass-panel">
+      <ActionBuilder selectedPlugin="kafka" connections={connections} onExecute={onExecute} />
+      <div className="kafka-action-sidepanel">
+        <Card className="glass-panel kafka-action-intro-card">
           <div className="page-header">
             <div>
-              <H4>Kafka monitoring</H4>
-              <p className={Classes.TEXT_MUTED}>Use the Kafka plugin to discover topics and inspect message contents.</p>
+              <H4>Kafka administration</H4>
+              <p className={Classes.TEXT_MUTED}>Use the Kafka plugin to discover topics, manage clusters, and inspect message contents.</p>
             </div>
           </div>
-          {hasKafkaConnection ? (
-            <KafkaTopicExplorer connections={connections} />
-          ) : (
-            <div className={Classes.TEXT_MUTED}>
-              No Kafka connection is configured yet. Add a Kafka connection to enable topic discovery and message inspection.
-            </div>
-          )}
         </Card>
+
+        {hasKafkaConnection ? (
+          <KafkaAdminPanel connections={connections} />
+        ) : (
+          <Card className="glass-panel kafka-action-empty-card">
+            <p className={Classes.TEXT_MUTED}>
+              No Kafka connection is configured yet. Add a Kafka connection to enable topic discovery and administration.
+            </p>
+          </Card>
+        )}
+
+        <KafkaDataGenerator />
       </div>
     </div>
   )

@@ -318,6 +318,26 @@ body {
   gap: 0.75rem;
 }
 
+.kafka-admin-card {
+  padding: 1rem;
+}
+
+.kafka-topic-item {
+  padding: 0.75rem;
+}
+
+.topic-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topic-item-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .dashboard-list-item {
   padding: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -338,6 +358,15 @@ body {
   grid-template-columns: 1fr 1fr auto;
   gap: 0.75rem;
   align-items: end;
+}
+
+.kafka-topic-create-card {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kafka-topic-create-card .kafka-topic-row {
+  grid-template-columns: 2fr 1fr 1fr auto;
 }
 
 .topic-list {
@@ -416,16 +445,30 @@ body {
 
 .page-shell {
   flex: 1;
-  padding: 2rem;
+  padding: 1.5rem 2rem;
   overflow: auto;
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  min-width: 0;
+}
+
+.app-shell,
+#root,
+body {
+  width: 100%;
+  min-width: 0;
+}
+
+.breadcrumbs {
+  margin-top: 0.75rem;
 }
 
 .page,
 .result-list {
   display: grid;
   gap: 1.25rem;
+  width: 100%;
 }
 
 .result-list .page-header > div {
@@ -542,10 +585,63 @@ body {
 }
 
 .page-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 40rem) minmax(0, 1fr);
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.page-grid > * {
+  flex: 1 1 32rem;
+  min-width: 32rem;
+  max-width: 100%;
+}
+
+.workflow-page-grid {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.kafka-action-sidepanel {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
-  align-items: start;
+  min-width: 32rem;
+  max-width: 100%;
+}
+
+.kafka-action-sidepanel > .glass-panel,
+.kafka-action-sidepanel > * {
+  width: 100%;
+  min-width: 0;
+}
+
+.kafka-action-intro-card,
+.kafka-action-empty-card,
+.action-root-card {
+  padding: 1.25rem;
+}
+
+.kafka-action-empty-card {
+  min-height: 9rem;
+  display: grid;
+  align-items: center;
+}
+
+.action-root-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+
+.action-root-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+  min-height: 12rem;
 }
 
 .form-grid,
@@ -555,9 +651,15 @@ body {
   gap: 0.75rem;
 }
 
+.workflow-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .action-builder-card,
 .kafka-data-generator-card,
-.connection-card {
+.connection-card,
+.workflow-sidebar {
   padding: 1.25rem;
 }
 
@@ -595,9 +697,27 @@ pre {
 }
 
 @media (max-width: 960px) {
-  .page-grid {
-    grid-template-columns: 1fr;
+  .page-grid,
+  .workflow-page-grid {
+    display: block;
   }
+
+  .page-grid > *,
+  .workflow-page-grid > * {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+.navbar-popover,
+.navbar-popover .bp6-popover,
+.navbar-popover .bp6-popover-content,
+.navbar-popover .bp6-menu {
+  z-index: 9999 !important;
+}
+
+.bp6-popover.bp6-popover-open {
+  position: fixed;
 }
 
 /* Thin sidebar-rail navigation for narrow / mobile viewports. */

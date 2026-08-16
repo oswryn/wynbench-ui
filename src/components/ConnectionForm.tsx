@@ -83,7 +83,27 @@ function ConnectionForm({ onSubmit }: ConnectionFormProps) {
 
         {activeProtocol.fields.map((field) => (
           <FormGroup key={field.key} label={field.label} labelFor={`connection-${field.key}`}>
-            {field.multiline ? (
+            {field.type === 'select' ? (
+              <HTMLSelect
+                id={`connection-${field.key}`}
+                fill
+                required
+                value={typeof formState.config[field.key] === 'string' ? (formState.config[field.key] as string) : ''}
+                onChange={(event) =>
+                  setFormState((current) => ({
+                    ...current,
+                    config: { ...current.config, [field.key]: event.target.value },
+                  }))
+                }
+              >
+                <option value="">Select...</option>
+                {field.options?.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </HTMLSelect>
+            ) : field.multiline || field.type === 'textarea' ? (
               <TextArea
                 id={`connection-${field.key}`}
                 fill
