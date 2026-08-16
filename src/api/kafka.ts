@@ -135,7 +135,7 @@ export async function readKafkaTopicMessages(
 
   const result = await executeAction({
     plugin: 'kafka',
-    connection_id: connectionId,
+    connection_id: connectionId || undefined,
     params,
   })
 
